@@ -2,69 +2,19 @@ import requests
 from bs4 import BeautifulSoup
 import re
 
-# List of websites to check
-websites = [
-    "http://askmeguru.com/",
-    "https://www.jnettechnologies.com/",
-    "https://www.sparity.com/",
-    "https://conquerorstech.net/",
-    "http://www.brainovision.in/",
-    "https://axassoftware.com/",
-    "http://www.magneqservices.in/",
-    "https://raybiztech.com/",
-    "https://www.encora.com/",
-    "https://www.foraysoft.com/",
-    "https://www.avineon.com/en/apac/home",
-    "http://oracle.com/",
-    "http://www.eurekaitsol.com/",
-    "http://tstecnoservice.com/",
-    "http://www.experienceflow.ai/",
-    "https://greemus.com/",
-    "https://www.sisfirst.in/",
-    "http://www.pronteff.com/",
-    "https://www.savantis.com/",
-    "http://www.triloksoft.com/",
-    "http://www.metanoiasolutions.net/",
-    "http://www.shrasits.com/",
-    "https://techclouderp.com/",
-    "http://hgtechinc.net/",
-    "https://danyonittech.in/",
-    "https://www.elitecrest.in/",
-    "https://www.creativetechmars.com/",
-    "https://zenq.com/",
-    "https://www.suchirsoftech.com/",
-    "https://techweblabs.com/",
-    "http://www.tecnics.com/",
-    "https://elabsinfotech.com/",
-    "https://tekbon.com/",
-    "https://www.webappclouds.com/",
-    "http://www.zazz.io/",
-    "http://scienstechnologies.com/",
-    "https://www.iblesoft.com/",
-    "https://www.mwebware.com/",
-    "http://vagarioussolutions.com/",
-    "https://fission.it/",
-    "http://www.c2n.in/",
-    "http://www.megasoft.com/",
-    "http://www.acuvate.com/",
-    "http://vortextechnologies.net/",
-    "https://camelq.in/",
-    "https://www.kexlin.com/",
-    "https://www.techbulls.co.in/",
-    "http://www.sanoits.com/",
-    "http://votigo.com/",
-    "https://www.snovasys.com/",
-    "https://www.pramati.com/"
-]
-
-# Output file
+# Input and Output files
+input_file = "input_websites.txt"
 output_file = "linkedin_links.txt"
 
-# Clear previous content
+# Read websites from input file
+with open(input_file, "r") as file:
+    websites = [line.strip() for line in file if line.strip()]
+
+# Clear previous content from output file
 with open(output_file, "w") as file:
     file.write("")
 
-# Function to get all LinkedIn links from the HTML content using BeautifulSoup
+# Function to extract LinkedIn links
 def get_linkedin_links(url):
     try:
         headers = {
@@ -77,11 +27,11 @@ def get_linkedin_links(url):
 
             for a_tag in soup.find_all('a', href=True):
                 href = a_tag['href'].strip()
-                # Match any LinkedIn domain including in.linkedin.com, www.linkedin.com, etc.
+                # Match any LinkedIn domain (www.linkedin.com, in.linkedin.com, etc.)
                 if re.match(r'https?://(www\.|in\.)?linkedin\.com/[^\s"\'<>]+', href, re.IGNORECASE):
                     linkedin_links.append(href)
 
-            return list(set(linkedin_links))  # Unique list
+            return list(set(linkedin_links))  # Unique links
         else:
             print(f"🔴 Error fetching {url}: Status code {response.status_code}")
     except Exception as e:
@@ -93,9 +43,9 @@ for site in websites:
     linkedin_urls = get_linkedin_links(site)
     if linkedin_urls:
         print(f"✅ LinkedIn URLs found on {site}:")
-        for link in linkedin_urls:
-            # print(f"   - {link}")
-            with open(output_file, "a") as file:
+        with open(output_file, "a") as file:
+            for link in linkedin_urls:
+                print(f"   - {link}")
                 file.write(f"{link}\n")
     else:
         print(f"❌ No LinkedIn URL found on {site}")
