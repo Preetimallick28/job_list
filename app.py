@@ -49,3 +49,14 @@ for site in websites:
                 file.write(f"{link}\n")
     else:
         print(f"❌ No LinkedIn URL found on {site}")
+
+# After scraping is done
+import pygame
+import time
+
+pygame.mixer.init()
+pygame.mixer.music.load("done.mp3")  # Use your actual sound file
+pygame.mixer.music.play()
+
+while pygame.mixer.music.get_busy():
+    time.sleep(0.1)
