@@ -57,10 +57,6 @@ websites = [
     "https://www.pramati.com/"
 ]
 
-
-# Regex pattern to match LinkedIn URLs
-linkedin_pattern = re.compile(r'https?://([a-z]+\.)?linkedin\.com/(in|company)/[^\s"\'<>]+')
-
 # Output file
 output_file = "linkedin_links.txt"
 
@@ -68,27 +64,38 @@ output_file = "linkedin_links.txt"
 with open(output_file, "w") as file:
     file.write("")
 
-# Function to get LinkedIn links from a URL
+# Function to get all LinkedIn links from the HTML content using BeautifulSoup
 def get_linkedin_links(url):
     try:
-        response = requests.get(url, timeout=10)
-        soup = BeautifulSoup(response.text, "html.parser")
-        links = soup.find_all("a", href=True)
-        for link in links:
-            href = link["href"]
-            match = linkedin_pattern.search(href)
-            if match:
-                return match.group(0)
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/115 Safari/537.36'
+        }
+        response = requests.get(url, headers=headers, timeout=10)
+        if response.status_code == 200:
+            soup = BeautifulSoup(response.text, 'html.parser')
+            linkedin_links = []
+
+            for a_tag in soup.find_all('a', href=True):
+                href = a_tag['href'].strip()
+                # Match any LinkedIn domain including in.linkedin.com, www.linkedin.com, etc.
+                if re.match(r'https?://(www\.|in\.)?linkedin\.com/[^\s"\'<>]+', href, re.IGNORECASE):
+                    linkedin_links.append(href)
+
+            return list(set(linkedin_links))  # Unique list
+        else:
+            print(f"🔴 Error fetching {url}: Status code {response.status_code}")
     except Exception as e:
-        print(f"Error with {url}: {e}")
-    return None
+        print(f"🔴 Error with {url}: {e}")
+    return []
 
 # Main logic
 for site in websites:
-    linkedin_url = get_linkedin_links(site)
-    if linkedin_url:
-        print(f"✅ Found: {linkedin_url}")
-        with open(output_file, "a") as file:
-            file.write(linkedin_url + "\n")
+    linkedin_urls = get_linkedin_links(site)
+    if linkedin_urls:
+        print(f"✅ LinkedIn URLs found on {site}:")
+        for link in linkedin_urls:
+            # print(f"   - {link}")
+            with open(output_file, "a") as file:
+                file.write(f"{link}\n")
     else:
         print(f"❌ No LinkedIn URL found on {site}")
